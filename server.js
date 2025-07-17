@@ -5,17 +5,24 @@ const fs = require("fs");
 const cors = require("cors");
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
+
+// Определяем окружение
+const isDevelopment = process.env.NODE_ENV !== 'production';
 
 // Middleware
 app.use(cors({
   origin: [
     'http://localhost:3000',
-    'https://vermillion-phoenix-d0dfc1.netlify.app', // ваш Netlify домен
-    'https://gym-school-backend-production.up.railway.app' // Railway домен
+    'http://localhost:3001',
+    // Ваш актуальный домен Netlify
+    'https://vermillion-phoenix-d0dfc1.netlify.app',
+    // Ваш актуальный Railway домен
+    'https://db-test-production-e7f7.up.railway.app',
   ],
   credentials: true
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -180,6 +187,15 @@ ${newsItemsString}
 }
 
 // API маршруты
+
+// Health check endpoint
+app.get("/api/health", (req, res) => {
+  res.json({
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
 
 // Получить все новости
 app.get("/api/news", (req, res) => {
@@ -356,5 +372,9 @@ app.use((error, req, res, next) => {
 // Запуск сервера
 app.listen(PORT, () => {
   console.log(`🚀 Backend сервер запущен на порту ${PORT}`);
+  console.log(`🌍 Режим: ${isDevelopment ? 'development' : 'production'}`);
+  console.log(`📁 Папка для изображений: ${newsAssetsPath}`);
+  console.log(`⚙️ Файл конфигурации: ${newsConfigPath}`);
   console.log(`🌐 API доступно по адресу: http://localhost:${PORT}/api`);
+  console.log(`❤️ Health check: http://localhost:${PORT}/api/health`);
 });
